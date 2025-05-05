@@ -14,18 +14,18 @@ from TwitchChannelPointsMiner.classes.Gotify import Gotify
 from TwitchChannelPointsMiner.classes.Settings import Priority, Events, FollowersOrder
 from TwitchChannelPointsMiner.classes.entities.Bet import Strategy, BetSettings, Condition, OutcomeKeys, FilterCondition, DelayMode
 from TwitchChannelPointsMiner.classes.entities.Streamer import Streamer, StreamerSettings
-from keep_alive import keep_alive 
+from keep_alive import keep_alive
 import os
 
 keep_alive()
 
 twitch_miner = TwitchChannelPointsMiner(
-    username="WolfyIsCrack",
-    password="Dd45xy12.",           # If no password will be provided, the script will ask interactively
+    username=os.environ.get('username'),
+    password=os.environ.get('password'),         # If no password will be provided, the script will ask interactively
     claim_drops_startup=False,                  # If you want to auto claim all drops from Twitch inventory on the startup
     priority=[                                  # Custom priority in this case for example:
         Priority.STREAK,                        # - We want first of all to catch all watch streak from all streamers
-        Priority.DROPS,                         # - When we don't have anymore watch streak to catch, wait until all drops are collected over the streamers
+        Priority.SUBSCRIBED,                         # - When we don't have anymore watch streak to catch, wait until all drops are collected over the streamers
         Priority.ORDER                          # - When we have all of the drops claimed and no watch-streak available, use the order priority (POINTS_ASCENDING, POINTS_DESCENDING)
     ],
     enable_analytics=False,                     # Disables Analytics if False. Disabling it significantly reduces memory consumption
@@ -54,9 +54,9 @@ twitch_miner = TwitchChannelPointsMiner(
             disable_notification=True,                                              # Revoke the notification (sound/vibration)
         ),
         discord=Discord(
-            webhook_api="https://discord.com/api/webhooks/1369070782843588608/8ak24TnjBKf1V8fCLaQIjhVKQklpW-WrqR3Cc0JnmkD6r-f4eh_2O0BkxCSZK0u9h5Bd",  # Discord Webhook URL
+            webhook_api="https://discord.com/api/webhooks/1353330666749694013/xExZsNMYs3Hbej0wjT9EDlymAjMhCIceBaKYqoYbPEn71ngBSYqX2Jg-dqG5hjfcQOy_",  # Discord Webhook URL
             events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE,
-                    Events.BET_LOSE, Events.CHAT_MENTION],                                  # Only these events will be sent to the chat
+                    Events.GAIN_FOR_RAID, Events.GAIN_FOR_CLAIM, Events.GAIN_FOR_WATCH, Events.GAIN_FOR_WATCH_STREAK, Events.JOIN_RAID, Events.BONUS_CLAIM, Events.BET_START, Events.BET_FAILED, Events.BET_GENERAL, Events.BET_FILTERS, Events.BET_REFUND, Events.BET_LOSE, Events.BET_WIN],                                  # Only these events will be sent to the chat
         ),
         webhook=Webhook(
             endpoint="https://example.com/webhook",                                                                    # Webhook URL
@@ -101,7 +101,7 @@ twitch_miner = TwitchChannelPointsMiner(
             stealth_mode=True,                  # If the calculated amount of channel points is GT the highest bet, place the highest value minus 1-2 points Issue #33
             delay_mode=DelayMode.FROM_END,      # When placing a bet, we will wait until `delay` seconds before the end of the timer
             delay=6,
-            minimum_points=20000,               # Place the bet only if we have at least 20k points. Issue #113
+            minimum_points=1234,               # Place the bet only if we have at least 20k points. Issue #113
             filter_condition=FilterCondition(
                 by=OutcomeKeys.TOTAL_USERS,     # Where apply the filter. Allowed [PERCENTAGE_USERS, ODDS_PERCENTAGE, ODDS, TOP_POINTS, TOTAL_USERS, TOTAL_POINTS]
                 where=Condition.LTE,            # 'by' must be [GT, LT, GTE, LTE] than value
@@ -123,8 +123,8 @@ twitch_miner = TwitchChannelPointsMiner(
 
 twitch_miner.mine(
     [
-        Streamer("Arguz11", settings=StreamerSettings(make_predictions=True  , follow_raid=False , claim_drops=True  , watch_streak=True , community_goals=False , bet=BetSettings(strategy=Strategy.SMART      , percentage=5 , stealth_mode=True,  percentage_gap=20 , max_points=234   , filter_condition=FilterCondition(by=OutcomeKeys.TOTAL_USERS,      where=Condition.LTE, value=800 ) ) )),
-        Streamer("Zintid", settings=StreamerSettings(make_predictions=False , follow_raid=True  , claim_drops=False ,                                             bet=BetSettings(strategy=Strategy.PERCENTAGE , percentage=5 , stealth_mode=False, percentage_gap=20 , max_points=1234  , filter_condition=FilterCondition(by=OutcomeKeys.TOTAL_POINTS,     where=Condition.GTE, value=250 ) ) )),
+       Streamer("Arguz11", settings=StreamerSettings(make_predictions=False  , follow_raid=True , claim_drops=True  , watch_streak=True , community_goals=False  , bet=BetSettings(strategy=Strategy.SMART      , percentage=20 , stealth_mode=True,  percentage_gap=4 , max_points=1234   , filter_condition=FilterCondition(by=OutcomeKeys.TOTAL_USERS,      where=Condition.LTE, value=4200 ) ) )),
+       Streamer("Zintid", settings=StreamerSettings(make_predictions=False , follow_raid=True  , claim_drops=True ,  watch_streak=True , community_goals=False  , bet=BetSettings(strategy=Strategy.PERCENTAGE , percentage=5 , stealth_mode=False, percentage_gap=20 , max_points=1234  , filter_condition=FilterCondition(by=OutcomeKeys.TOTAL_USERS,     where=Condition.GTE, value=1 ) ) )),
 
     ],                                  # Array of streamers (order = priority)
     followers=False,                    # Automatic download the list of your followers
